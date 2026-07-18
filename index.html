@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight text-white">Laboratorio Virtual de Física</h1>
-                    <p class="text-xs text-slate-400 font-medium">Simulador de Péndulo Simple (Personalizado 50cm - 200cm)</p>
+                    <p class="text-xs text-slate-400 font-medium">Simulador de Péndulo Simple (Grados Enteros & Oscilaciones Personalizadas)</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -82,13 +82,6 @@
                     </div>
                     <input type="range" id="massSlider" min="0.10" max="3.00" value="1.20" step="0.05" 
                         class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                    
-                    <!-- Accesos rápidos solicitados en el laboratorio -->
-                    <div class="grid grid-cols-3 gap-2 pt-1">
-                        <button onclick="setMass(0.90)" class="px-2 py-1 bg-slate-900 border border-slate-800 hover:border-indigo-500 rounded-lg text-xs font-semibold text-slate-300 transition">0.90 kg</button>
-                        <button onclick="setMass(1.20)" class="px-2 py-1 bg-slate-900 border border-indigo-500/50 bg-indigo-500/5 rounded-lg text-xs font-semibold text-indigo-300 transition">1.20 kg</button>
-                        <button onclick="setMass(1.50)" class="px-2 py-1 bg-slate-900 border border-slate-800 hover:border-indigo-500 rounded-lg text-xs font-semibold text-slate-300 transition">1.50 kg</button>
-                    </div>
                 </div>
 
                 <!-- Control: Gravedad -->
@@ -121,13 +114,22 @@
                 </div>
             </div>
 
-            <!-- Tarjeta: Cronómetro de Laboratorio Automático (10 Oscilaciones) -->
+            <!-- Tarjeta: Cronómetro de Laboratorio Automático (Personalizable) -->
             <div class="bg-slate-950/40 border border-slate-800 rounded-2xl p-5 space-y-4">
                 <div class="border-b border-slate-800 pb-3">
                     <h2 class="font-semibold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> Prueba de 10 Oscilaciones
+                        <i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> Prueba de Oscilaciones
                     </h2>
-                    <p class="text-[11px] text-slate-400 mt-1">El sistema iniciará el cronómetro al soltar el péndulo y se detendrá automáticamente de forma exacta en la décima oscilación.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Configura el número de oscilaciones deseadas. El sistema iniciará automáticamente al soltar y se pausará de forma exacta al finalizar.</p>
+                </div>
+
+                <!-- Selector de oscilaciones deseadas -->
+                <div class="flex items-center justify-between gap-3 bg-slate-900/60 border border-slate-800 px-3 py-2 rounded-xl">
+                    <span class="text-xs text-slate-300 font-semibold uppercase tracking-wider">Oscilaciones Objetivo:</span>
+                    <div class="flex items-center gap-1">
+                        <input type="number" id="targetOscillationsInput" min="1" max="100" value="10" 
+                            class="w-16 bg-slate-950 text-indigo-400 font-bold text-center rounded-lg border border-slate-700 py-1 px-2 text-sm focus:outline-none focus:border-indigo-500 mono">
+                    </div>
                 </div>
 
                 <div class="bg-slate-900/80 border border-slate-800/80 rounded-xl p-4 text-center space-y-2">
@@ -136,12 +138,12 @@
                     
                     <div class="flex justify-center items-center gap-4 pt-1">
                         <div class="text-center">
-                            <span class="block text-[10px] uppercase text-slate-500 font-bold">Oscilaciones</span>
+                            <span class="block text-[10px] uppercase text-slate-500 font-bold">Progreso</span>
                             <span class="mono text-xl font-bold text-emerald-400" id="oscillationCounter">0 / 10</span>
                         </div>
                         <div class="w-px h-8 bg-slate-800"></div>
                         <div class="text-center">
-                            <span class="block text-[10px] uppercase text-slate-500 font-bold">Período T (t/10)</span>
+                            <span class="block text-[10px] uppercase text-slate-500 font-bold">Período T (t/N)</span>
                             <span class="mono text-xl font-bold text-indigo-400" id="measuredPeriodDisplay">0.000 s</span>
                         </div>
                     </div>
@@ -169,7 +171,7 @@
                 <div class="absolute top-6 left-6 z-10 flex flex-wrap gap-2 pointer-events-none">
                     <div class="bg-slate-900/90 border border-slate-800 backdrop-blur px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-lg">
                         <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-                        <span class="text-xs text-slate-300 font-medium">Ángulo: <strong id="angleHud" class="mono font-semibold">15.0°</strong></span>
+                        <span class="text-xs text-slate-300 font-medium">Ángulo: <strong id="angleHud" class="mono font-semibold">15°</strong></span>
                     </div>
                     <div class="bg-slate-900/90 border border-slate-800 backdrop-blur px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-lg">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
@@ -193,7 +195,7 @@
                     
                     <!-- Mensaje flotante de instrucción interactiva -->
                     <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 border border-slate-800/80 px-4 py-2 rounded-full text-xs text-slate-400 pointer-events-none flex items-center gap-2 shadow-xl">
-                        <i class="fa-solid fa-hand-pointer text-indigo-400 animate-bounce"></i> Arrastra la esfera para cambiar el ángulo inicial
+                        <i class="fa-solid fa-hand-pointer text-indigo-400 animate-bounce"></i> Arrastra la esfera para cambiar el ángulo (Grados Enteros)
                     </div>
                 </div>
 
@@ -206,7 +208,7 @@
                         <h2 class="font-semibold text-white flex items-center gap-2">
                             <i class="fa-solid fa-clipboard-list text-indigo-400"></i> Tabla de Registro de Laboratorio
                         </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Guarda los resultados del cronómetro automático para exportar tu informe.</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Guarda las mediciones de tu prueba personalizada para el informe.</p>
                     </div>
                     <div class="flex gap-2">
                         <button id="addRecordBtn" class="py-1.5 px-3 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 font-semibold border border-indigo-500/20 rounded-xl text-xs transition flex items-center gap-1.5">
@@ -225,7 +227,8 @@
                                 <th class="p-3 text-center">N°</th>
                                 <th class="p-3">Longitud (L)</th>
                                 <th class="p-3">Masa (m)</th>
-                                <th class="p-3 text-center">Tiempos 10 Osc. (t)</th>
+                                <th class="p-3 text-center">Oscilaciones (N)</th>
+                                <th class="p-3 text-center">Tiempo Total (t)</th>
                                 <th class="p-3">Período Exp. (T)</th>
                                 <th class="p-3">Período Teórico</th>
                                 <th class="p-3 text-center">% de Error</th>
@@ -235,10 +238,22 @@
                         <tbody class="divide-y divide-slate-800 text-slate-300" id="tableBody">
                             <!-- Los registros dinámicos se insertarán aquí -->
                             <tr id="emptyRow">
-                                <td colspan="8" class="p-6 text-center text-slate-500 italic">No hay mediciones guardadas. ¡Inicia una prueba de 10 oscilaciones y haz clic en "Guardar Medida"!</td>
+                                <td colspan="9" class="p-6 text-center text-slate-500 italic">No hay mediciones guardadas. ¡Inicia una prueba de oscilaciones y haz clic en "Guardar Medida"!</td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Panel dinámico de promedio experimental de la tabla -->
+                <div id="averageStatsCard" class="hidden p-4 bg-indigo-950/20 border border-indigo-500/10 rounded-xl flex justify-between items-center text-xs sm:text-sm">
+                    <div class="flex items-center gap-2 text-indigo-300">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                        <div>
+                            <span class="block font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Cálculo Dinámico de Aula</span>
+                            <span class="font-bold">Promedio de Períodos Experimentales</span>
+                        </div>
+                    </div>
+                    <span id="averagePeriodDisplay" class="mono font-bold text-indigo-400 text-xl sm:text-2xl bg-indigo-950/40 px-3 py-1 rounded-lg border border-indigo-500/20">0.000 s</span>
                 </div>
             </div>
 
@@ -278,7 +293,8 @@
         let isPaused = false;
         let timeScale = 1.0; // 1.0 = Tiempo real, < 1.0 = Cámara lenta
 
-        // --- SISTEMA DE CRONÓMETRO DE PRUEBA (10 OSCILACIONES) ---
+        // --- SISTEMA DE CRONÓMETRO DE PRUEBA PERSONALIZADO ---
+        let targetOscillations = 10; // Personalizable por el usuario
         let isTesting = false;
         let testStartTime = 0;
         let testElapsedTime = 0;
@@ -306,6 +322,7 @@
         const gravityVal = document.getElementById('gravityVal');
         const frictionSlider = document.getElementById('frictionSlider');
         const frictionVal = document.getElementById('frictionVal');
+        const targetOscillationsInput = document.getElementById('targetOscillationsInput');
 
         // Controles de simulación
         const playPauseSimBtn = document.getElementById('playPauseSimBtn');
@@ -314,24 +331,26 @@
         const slowMoText = document.getElementById('slowMoText');
         const resetParamsBtn = document.getElementById('resetParamsBtn');
 
-        // Controles de la prueba de 10 oscilaciones
+        // Controles de la prueba de oscilaciones
         const stopwatchDisplay = document.getElementById('stopwatchDisplay');
         const oscillationCounter = document.getElementById('oscillationCounter');
         const measuredPeriodDisplay = document.getElementById('measuredPeriodDisplay');
         const startTestBtn = document.getElementById('startTestBtn');
         const resetTestBtn = document.getElementById('resetTestBtn');
 
-        // Tabla de registros
+        // Tabla de registros y promedio
         const addRecordBtn = document.getElementById('addRecordBtn');
         const clearTableBtn = document.getElementById('clearTableBtn');
         const tableBody = document.getElementById('tableBody');
         const emptyRow = document.getElementById('emptyRow');
+        const averageStatsCard = document.getElementById('averageStatsCard');
+        const averagePeriodDisplay = document.getElementById('averagePeriodDisplay');
 
         // HUD e Interfaces
         const angleHud = document.getElementById('angleHud');
         const theoreticalPeriodHud = document.getElementById('theoreticalPeriodHud');
 
-        // --- STREAMING_CHUNK: Configurando los listeners de eventos... ---
+        // --- STREAMING_CHUNK: Vinculando eventos de interfaz de usuario... ---
         
         // Sincronizar sliders con variables
         lengthSlider.addEventListener('input', (e) => {
@@ -353,17 +372,22 @@
 
         frictionSlider.addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
-            frictionCoeff = val * 0.005; // Escalar el valor para una amortiguación física creíble
+            frictionCoeff = val * 0.005; 
             frictionVal.textContent = `${(val * 20).toFixed(0)} %`;
         });
 
-        // Controles rápidos de presets
-        function setMass(kg) {
-            massKg = kg;
-            massSlider.value = kg;
-            massVal.textContent = `${kg.toFixed(2)} kg`;
-            showToast("Masa Ajustada", `Se fijó la masa en ${kg.toFixed(2)} kg.`, "fa-weight-hanging");
-        }
+        // Configuración de oscilaciones objetivo
+        targetOscillationsInput.addEventListener('change', (e) => {
+            let val = parseInt(e.target.value);
+            if (isNaN(val) || val < 1) {
+                val = 1;
+            } else if (val > 100) {
+                val = 100;
+            }
+            targetOscillations = val;
+            e.target.value = val;
+            oscillationCounter.textContent = `0 / ${targetOscillations}`;
+        });
 
         function setGravity(g) {
             gravity = g;
@@ -381,16 +405,19 @@
             frictionCoeff = 0.0;
             angle = 15 * Math.PI / 180;
             angularVelocity = 0.0;
+            targetOscillations = 10;
 
             lengthSlider.value = 120;
             massSlider.value = 1.20;
             gravitySlider.value = 9.81;
             frictionSlider.value = 0;
+            targetOscillationsInput.value = 10;
 
             lengthVal.textContent = "120 cm";
             massVal.textContent = "1.20 kg";
             gravityVal.textContent = "9.81 m/s²";
             frictionVal.textContent = "0 %";
+            oscillationCounter.textContent = "0 / 10";
 
             updateTheoreticalHud();
             showToast("Parámetros Reseteados", "Los valores han regresado a su estado inicial de laboratorio.", "fa-rotate-left");
@@ -399,6 +426,10 @@
         // Play/Pause de simulación
         playPauseSimBtn.addEventListener('click', () => {
             isPaused = !isPaused;
+            updatePlayPauseButtonUI();
+        });
+
+        function updatePlayPauseButtonUI() {
             if (isPaused) {
                 playPauseIcon.className = "fa-solid fa-play";
                 playPauseSimBtn.classList.remove("bg-indigo-600");
@@ -410,12 +441,12 @@
                 playPauseSimBtn.classList.remove("bg-emerald-600");
                 showToast("Simulación Reanudada", "El péndulo oscila nuevamente.", "fa-play");
             }
-        });
+        }
 
         // Cámara lenta
         slowMoBtn.addEventListener('click', () => {
             if (timeScale === 1.0) {
-                timeScale = 0.25; // 4x más lento
+                timeScale = 0.25; 
                 slowMoBtn.classList.remove("bg-slate-800");
                 slowMoBtn.classList.add("bg-indigo-500/20", "border", "border-indigo-500/30", "text-indigo-400");
                 slowMoText.textContent = "Cámara Lenta (0.25x)";
@@ -431,25 +462,26 @@
 
         // --- STREAMING_CHUNK: Implementando la lógica del cronómetro inteligente... ---
 
-        // Iniciar prueba de 10 oscilaciones
+        // Iniciar prueba de oscilaciones configurables
         startTestBtn.addEventListener('click', () => {
             if (isTesting) return;
 
-            // Preparación física ideal para evitar fricciones aleatorias durante el examen
+            // Desactivar fricción durante el test para un resultado óptimo de laboratorio ideal
             frictionCoeff = 0;
             frictionSlider.value = 0;
             frictionVal.textContent = "0 %";
 
-            // Detenemos el péndulo para soltarlo desde un ángulo controlado (ejemplo 15 grados)
+            // Detener el péndulo para soltarlo exactamente desde 15 grados enteros
             angle = 15 * Math.PI / 180;
             angularVelocity = 0;
             
-            // Forzar pausa apagada para iniciar
+            // Forzar reproducción para iniciar la oscilación
             isPaused = false;
             playPauseIcon.className = "fa-solid fa-pause";
             playPauseSimBtn.classList.add("bg-indigo-600");
+            playPauseSimBtn.classList.remove("bg-emerald-600");
 
-            // Configurar variables de testeo
+            // Configurar variables de testeo con el objetivo personalizado
             isTesting = true;
             testCompleted = false;
             oscillationCount = 0;
@@ -457,37 +489,38 @@
             testElapsedTime = 0;
             previousAngle = angle;
             
-            // Determinar sentido del primer movimiento (irá a la izquierda)
             isMovingRight = false;
             hasCrossedZero = false;
 
-            oscillationCounter.textContent = "0 / 10";
+            oscillationCounter.textContent = `0 / ${targetOscillations}`;
             measuredPeriodDisplay.textContent = "Calculando...";
             startTestBtn.disabled = true;
             startTestBtn.classList.add("opacity-50", "cursor-not-allowed");
+            targetOscillationsInput.disabled = true;
 
-            showToast("Prueba Iniciada", "Soltando péndulo... El cronómetro comenzará inmediatamente.", "fa-stopwatch");
+            showToast("Prueba Iniciada", `Soltando péndulo... El cronómetro se detendrá en la oscilación ${targetOscillations}.`, "fa-stopwatch");
         });
 
-        // Resetear prueba de 10 oscilaciones
+        // Resetear prueba
         resetTestBtn.addEventListener('click', () => {
             isTesting = false;
             testCompleted = false;
             oscillationCount = 0;
             testElapsedTime = 0;
             stopwatchDisplay.textContent = "00:00.000";
-            oscillationCounter.textContent = "0 / 10";
+            oscillationCounter.textContent = `0 / ${targetOscillations}`;
             measuredPeriodDisplay.textContent = "0.000 s";
             
             startTestBtn.disabled = false;
             startTestBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            targetOscillationsInput.disabled = false;
             showToast("Prueba Reiniciada", "Cronómetro y contador restaurados.", "fa-trash-can");
         });
 
         // Guardar medida en la tabla
         addRecordBtn.addEventListener('click', () => {
             if (!testCompleted && finalMeasuredPeriod === 0) {
-                showToast("Error al Guardar", "Debes completar primero una prueba automática de 10 oscilaciones.", "fa-triangle-exclamation");
+                showToast("Error al Guardar", "Debes completar primero una prueba de oscilaciones automáticas.", "fa-triangle-exclamation");
                 return;
             }
 
@@ -499,7 +532,8 @@
                 id: records.length + 1,
                 length: lengthCm,
                 mass: massKg,
-                time: (measuredT * 10).toFixed(3),
+                oscillations: targetOscillations,
+                time: (measuredT * targetOscillations).toFixed(3),
                 measured: measuredT.toFixed(3),
                 theoretical: theoreticalT.toFixed(3),
                 error: errorPct.toFixed(2)
@@ -507,7 +541,7 @@
 
             records.push(record);
             updateTable();
-            showToast("Medida Guardada", "Se ha registrado la oscilación en la tabla de resultados.", "fa-clipboard-check");
+            showToast("Medida Guardada", "Se ha registrado la oscilación en tu reporte.", "fa-clipboard-check");
         });
 
         // Limpiar tabla
@@ -517,9 +551,8 @@
             showToast("Tabla Limpia", "Se han borrado todos los registros de laboratorio.", "fa-trash");
         });
 
-        // --- STREAMING_CHUNK: Resolviendo el motor matemático (Verlet/Euler) y renderizado en Canvas... ---
+        // --- STREAMING_CHUNK: Resolviendo el motor matemático con Redondeo a Grados Enteros... ---
 
-        // Ajustar el canvas al contenedor
         function resizeCanvas() {
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
@@ -529,7 +562,6 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Fórmula Teórica del período
         function calculateTheoreticalPeriod() {
             const lenMeters = lengthCm / 100;
             return 2 * Math.PI * Math.sqrt(lenMeters / gravity);
@@ -541,7 +573,7 @@
         }
         updateTheoreticalHud();
 
-        // Interacción con Mouse/Touch para arrastrar el péndulo
+        // Obtener el ángulo redondeado a grados enteros (sin decimales incómodos)
         function getMouseAngle(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -550,7 +582,9 @@
             const mouseX = clientX - rect.left - originX;
             const mouseY = clientY - rect.top - originY;
             
-            return Math.atan2(mouseX, mouseY);
+            const rawRad = Math.atan2(mouseX, mouseY);
+            const deg = Math.round(rawRad * 180 / Math.PI); // Redondeo a grado entero
+            return deg * Math.PI / 180; // Volver a radianes
         }
 
         function startDrag(e) {
@@ -560,22 +594,20 @@
             const mouseX = clientX - rect.left;
             const mouseY = clientY - rect.top;
 
-            // Determinar la posición visual actual de la masa del péndulo
             const lenPixels = lengthCm * scaleFactor;
             const bobX = originX + lenPixels * Math.sin(angle);
             const bobY = originY + lenPixels * Math.cos(angle);
 
-            // Radio de detección para clic
             const dist = Math.hypot(mouseX - bobX, mouseY - bobY);
             if (dist < 30) {
                 isDragging = true;
-                angularVelocity = 0; // Detener movimiento físico
+                angularVelocity = 0; 
                 if (isTesting) {
-                    // Si arrastra mientras hacía prueba, cancelar la prueba
                     isTesting = false;
                     startTestBtn.disabled = false;
                     startTestBtn.classList.remove("opacity-50", "cursor-not-allowed");
-                    oscillationCounter.textContent = "0 / 10";
+                    targetOscillationsInput.disabled = false;
+                    oscillationCounter.textContent = `0 / ${targetOscillations}`;
                     measuredPeriodDisplay.textContent = "0.000 s";
                 }
             }
@@ -586,7 +618,7 @@
             e.preventDefault();
             angle = getMouseAngle(e);
             
-            // Limitar ángulo de arrastre por seguridad científica a máximo 80 grados
+            // Límite de seguridad de oscilación clásica
             const limit = 80 * Math.PI / 180;
             if (angle > limit) angle = limit;
             if (angle < -limit) angle = -limit;
@@ -595,7 +627,7 @@
         function stopDrag() {
             if (isDragging) {
                 isDragging = false;
-                angularVelocity = 0; // Empieza desde el reposo al soltar
+                angularVelocity = 0; 
             }
         }
 
@@ -607,7 +639,7 @@
         canvas.addEventListener('touchmove', doDrag, { passive: false });
         window.addEventListener('touchend', stopDrag);
 
-        // --- STREAMING_CHUNK: Bucle principal de animación y física... ---
+        // --- STREAMING_CHUNK: Ejecutando simulación física y auto-pausa... ---
         
         let lastTime = performance.now();
 
@@ -615,27 +647,21 @@
             let dt = (now - lastTime) / 1000;
             lastTime = now;
 
-            // Proteger contra desfases bruscos por inactividad de pestaña
             if (dt > 0.1) dt = 0.1;
 
             if (!isPaused && !isDragging) {
-                // Escalar el paso de tiempo por la velocidad de la animación
                 const simDt = dt * timeScale;
 
-                // Ecuación del péndulo simple con amortiguación
-                // alpha = -(g/L)*sin(theta) - b*omega
                 const lenMeters = lengthCm / 100;
                 angularAcceleration = -(gravity / lenMeters) * Math.sin(angle) - (frictionCoeff / massKg) * angularVelocity;
                 
-                // Integración de Euler-Cromer (conserva la energía mejor que el Euler simple)
                 angularVelocity += angularAcceleration * simDt;
                 angle += angularVelocity * simDt;
 
-                // --- LÓGICA DE DETECCIÓN DE OSCILACIONES EN PRUEBA ---
+                // Detección inteligente de oscilaciones para testeo
                 if (isTesting && !testCompleted) {
                     testElapsedTime += simDt;
 
-                    // Formatear cronómetro visual
                     const totalMs = Math.floor(testElapsedTime * 1000);
                     const minutes = Math.floor(totalMs / 60000);
                     const seconds = Math.floor((totalMs % 60000) / 1000);
@@ -644,45 +670,47 @@
                     stopwatchDisplay.textContent = 
                         `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(ms).padStart(2, '0')}`;
 
-                    // Detección robusta de oscilación completa mediante paso por cero en el mismo sentido:
-                    // Si el ángulo cruza de negativo a positivo, significa que volvió a su lado de inicio.
+                    // Cruce por cero en sentido inverso del inicio
                     if (previousAngle < 0 && angle >= 0) {
                         oscillationCount++;
-                        oscillationCounter.textContent = `${oscillationCount} / 10`;
+                        oscillationCounter.textContent = `${oscillationCount} / ${targetOscillations}`;
 
-                        if (oscillationCount >= 10) {
-                            // Detener la prueba físicamente
+                        if (oscillationCount >= targetOscillations) {
                             testCompleted = true;
                             isTesting = false;
-                            finalMeasuredPeriod = testElapsedTime / 10;
+                            finalMeasuredPeriod = testElapsedTime / targetOscillations;
                             measuredPeriodDisplay.textContent = `${finalMeasuredPeriod.toFixed(3)} s`;
                             
-                            // Reestablecer controles
+                            // Reestablecer inputs
                             startTestBtn.disabled = false;
                             startTestBtn.classList.remove("opacity-50", "cursor-not-allowed");
+                            targetOscillationsInput.disabled = false;
+
+                            // ¡AUTOPAUSA AL FINALIZAR EL CONTEO!
+                            isPaused = true;
+                            updatePlayPauseButtonUI();
                             
-                            showToast("¡Prueba Terminada!", "Se registraron las 10 oscilaciones con precisión digital.", "fa-stopwatch-20");
+                            showToast("¡Prueba Terminada y Pausada!", `Se completaron las ${targetOscillations} oscilaciones con detención física automática.`, "fa-stopwatch-20");
                         }
                     }
                     previousAngle = angle;
                 }
             }
 
-            // Actualizar HUD de ángulo instantáneo
-            const displayAngle = Math.abs(angle * 180 / Math.PI).toFixed(1);
+            // Actualizar HUD de ángulo instantáneo a grados enteros
+            const displayAngle = Math.round(angle * 180 / Math.PI);
             angleHud.textContent = `${displayAngle}°`;
 
             render();
             requestAnimationFrame(animate);
         }
 
-        // --- STREAMING_CHUNK: Dibujando el péndulo e interfaz en el Canvas... ---
+        // --- STREAMING_CHUNK: Renderizando componentes visuales... ---
         
         function render() {
-            // Limpiar fondo
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar rejilla científica sutil de fondo
+            // Rejilla de fondo
             ctx.strokeStyle = '#1e293b';
             ctx.lineWidth = 1;
             for (let i = 0; i < canvas.width; i += 50) {
@@ -698,22 +726,21 @@
                 ctx.stroke();
             }
 
-            // Calcular coordenadas cartesianas de la masa
             const lenPixels = lengthCm * scaleFactor;
             const bobX = originX + lenPixels * Math.sin(angle);
             const bobY = originY + lenPixels * Math.cos(angle);
 
-            // 1. Dibujar el soporte/pivote superior
+            // Soporte superior
             ctx.fillStyle = '#475569';
             ctx.fillRect(originX - 40, originY - 10, 80, 10);
             
-            // Punto central del pivote
+            // Pivote
             ctx.beginPath();
             ctx.arc(originX, originY, 6, 0, Math.PI * 2);
             ctx.fillStyle = '#6366f1';
             ctx.fill();
 
-            // 2. Dibujar la cuerda (Línea)
+            // Cuerda
             ctx.beginPath();
             ctx.moveTo(originX, originY);
             ctx.lineTo(bobX, bobY);
@@ -721,61 +748,65 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Dibujar arcos/líneas del transportador de ángulos si está oscilando
+            // Arco del transportador
             ctx.beginPath();
             ctx.arc(originX, originY, 40, Math.PI/2 - Math.abs(angle), Math.PI/2 + Math.abs(angle));
             ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
             ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            // 3. Dibujar la esfera (Masa) con degradado 3D realista
-            // El radio visual se incrementa ligeramente según la masa
+            // Esfera de la masa
             const radius = 18 + (massKg * 4); 
             const grad = ctx.createRadialGradient(bobX - radius*0.3, bobY - radius*0.3, radius*0.1, bobX, bobY, radius);
-            grad.addColorStop(0, '#a5b4fc'); // Reflejo brillante de luz
-            grad.addColorStop(0.3, '#4f46e5'); // Color principal
-            grad.addColorStop(1, '#1e1b4b'); // Sombra oscura
+            grad.addColorStop(0, '#a5b4fc'); 
+            grad.addColorStop(0.3, '#4f46e5'); 
+            grad.addColorStop(1, '#1e1b4b'); 
 
             ctx.beginPath();
             ctx.arc(bobX, bobY, radius, 0, Math.PI * 2);
             ctx.fillStyle = grad;
             ctx.fill();
             
-            // Borde metálico exterior de la esfera
             ctx.strokeStyle = '#818cf8';
             ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            // Dibujar marcador de centro
             ctx.beginPath();
             ctx.arc(bobX, bobY, 2, 0, Math.PI * 2);
             ctx.fillStyle = '#ffffff';
             ctx.fill();
         }
 
-        // --- STREAMING_CHUNK: Implementando la tabla y sistema de notificaciones... ---
+        // --- STREAMING_CHUNK: Actualizando tabla y cálculo del promedio general... ---
 
-        // Actualizar tabla visualmente
+        // Actualizar tabla y calcular promedio dinámico
         function updateTable() {
-            // Vaciar filas antiguas de datos
             const rows = tableBody.querySelectorAll('tr:not(#emptyRow)');
             rows.forEach(r => r.remove());
 
             if (records.length === 0) {
                 emptyRow.classList.remove('hidden');
+                averageStatsCard.classList.add('hidden');
                 return;
             }
 
             emptyRow.classList.add('hidden');
+            averageStatsCard.classList.remove('hidden');
+
+            let periodSum = 0;
 
             records.forEach((rec, idx) => {
+                const measuredNum = parseFloat(rec.measured);
+                periodSum += measuredNum;
+
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-900/60 border-b border-slate-800 transition";
                 tr.innerHTML = `
                     <td class="p-3 text-center font-bold text-slate-400">${idx + 1}</td>
                     <td class="p-3 font-semibold text-white">${rec.length} cm</td>
                     <td class="p-3 font-semibold">${rec.mass.toFixed(2)} kg</td>
-                    <td class="p-3 text-center mono text-emerald-400">${rec.time} s</td>
+                    <td class="p-3 text-center font-semibold text-slate-400">${rec.oscillations}</td>
+                    <td class="p-3 text-center mono text-slate-300">${rec.time} s</td>
                     <td class="p-3 font-bold text-indigo-400 mono">${rec.measured} s</td>
                     <td class="p-3 text-slate-300 mono">${rec.theoretical} s</td>
                     <td class="p-3 text-center">
@@ -791,16 +822,20 @@
                 `;
                 tableBody.appendChild(tr);
             });
+
+            // Mostrar el promedio dinámico del período experimental
+            const averagePeriod = periodSum / records.length;
+            averagePeriodDisplay.textContent = `${averagePeriod.toFixed(3)} s`;
         }
 
         // Borrar registro individual
         window.deleteRecord = function(id) {
             records = records.filter(rec => rec.id !== id);
             updateTable();
-            showToast("Registro Eliminado", "Se removió la medida seleccionada.", "fa-trash");
+            showToast("Registro Eliminado", "Se removió la medida seleccionada de la tabla.", "fa-trash");
         };
 
-        // Sistema estético de Toasts en vez de molestos alert()
+        // Sistema estético de Toasts
         let toastTimeout;
         function showToast(title, msg, iconClass) {
             const toast = document.getElementById('toastNotification');
@@ -814,18 +849,16 @@
             tMsg.textContent = msg;
             tIcon.className = `fa-solid ${iconClass} text-sm`;
 
-            // Mostrar
             toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
             toast.classList.add('translate-y-0', 'opacity-100');
 
-            // Esconder automáticamente tras 3.5 segundos
             toastTimeout = setTimeout(() => {
                 toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
                 toast.classList.remove('translate-y-0', 'opacity-100');
             }, 3500);
         }
 
-        // Arrancar la animación en el ciclo de carga inicial
+        // Iniciar bucle de renderizado
         requestAnimationFrame(animate);
 
     </script>
