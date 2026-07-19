@@ -112,6 +112,24 @@
                     <input type="range" id="frictionSlider" min="0" max="5" value="0" step="0.5" 
                         class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
                 </div>
+
+                <!-- Control: Ángulo de Lanzamiento Manual -->
+                <div class="space-y-2 pt-3 border-t border-slate-850">
+                    <div class="flex justify-between items-center text-sm">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-slate-300 font-medium">Ángulo de Lanzamiento (θ)</span>
+                            <i class="fa-solid fa-circle-info text-[10px] text-slate-500" title="Digita un ángulo exacto de lanzamiento (entre -80 y 80 grados)."></i>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <input type="number" id="angleManualInput" min="-80" max="80" value="15" 
+                                class="w-16 bg-slate-900 text-indigo-400 font-bold text-center rounded-lg border border-slate-700 py-0.5 px-2 text-xs focus:outline-none focus:border-indigo-500 mono">
+                            <span class="text-xs text-slate-400">°</span>
+                        </div>
+                    </div>
+                    <button id="setAngleBtn" class="w-full py-2 bg-indigo-600/10 hover:bg-indigo-600/20 active:bg-indigo-600/30 text-indigo-400 font-semibold border border-indigo-500/20 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-arrows-to-circle"></i> Posicionar Ángulo (Pausado)
+                    </button>
+                </div>
             </div>
 
             <!-- Tarjeta: Cronómetro de Laboratorio Automático (Personalizable) -->
@@ -120,7 +138,20 @@
                     <h2 class="font-semibold text-white flex items-center gap-2">
                         <i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> Prueba de Oscilaciones
                     </h2>
-                    <p class="text-[11px] text-slate-400 mt-1">Configura el número de oscilaciones deseadas. El sistema iniciará automáticamente al soltar y se pausará de forma exacta al finalizar.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Configura el número de oscilaciones deseadas. En modo automático el cronómetro para solo; en modo manual tú decides cuándo detenerlo.</p>
+                </div>
+
+                <!-- Selector de Modo de Cronómetro -->
+                <div class="space-y-1.5">
+                    <span class="block text-[10px] uppercase text-slate-500 font-bold">Modo de Cronómetro</span>
+                    <div class="grid grid-cols-2 gap-2 bg-slate-900/60 p-1 rounded-xl border border-slate-800">
+                        <button id="modeAutoBtn" class="py-1.5 px-2 text-xs font-bold rounded-lg transition bg-indigo-600 text-white shadow">
+                            <i class="fa-solid fa-robot mr-1"></i> Automático
+                        </button>
+                        <button id="modeManualBtn" class="py-1.5 px-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-slate-200">
+                            <i class="fa-solid fa-hand-pointer mr-1"></i> Manual
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Selector de oscilaciones deseadas -->
@@ -295,6 +326,7 @@
 
         // --- SISTEMA DE CRONÓMETRO DE PRUEBA PERSONALIZADO ---
         let targetOscillations = 10; // Personalizable por el usuario
+        let measurementMode = 'auto'; // 'auto' o 'manual'
         let isTesting = false;
         let testStartTime = 0;
         let testElapsedTime = 0;
@@ -323,6 +355,11 @@
         const frictionSlider = document.getElementById('frictionSlider');
         const frictionVal = document.getElementById('frictionVal');
         const targetOscillationsInput = document.getElementById('targetOscillationsInput');
+
+        const angleManualInput = document.getElementById('angleManualInput');
+        const setAngleBtn = document.getElementById('setAngleBtn');
+        const modeAutoBtn = document.getElementById('modeAutoBtn');
+        const modeManualBtn = document.getElementById('modeManualBtn');
 
         // Controles de simulación
         const playPauseSimBtn = document.getElementById('playPauseSimBtn');
@@ -389,6 +426,61 @@
             oscillationCounter.textContent = `0 / ${targetOscillations}`;
         });
 
+        // Listener de Ángulo Manual
+        setAngleBtn.addEventListener('click', () => {
+            let val = parseInt(angleManualInput.value);
+            if (isNaN(val)) val = 15;
+            if (val > 80) val = 80;
+            if (val < -80) val = -80;
+            angleManualInput.value = val;
+
+            angle = val * Math.PI / 180;
+            angularVelocity = 0;
+            angularAcceleration = 0;
+
+            // Pausar física para que puedan liberar de forma limpia
+            isPaused = true;
+            updatePlayPauseButtonUI();
+
+            render();
+            showToast("Ángulo Configurado", `Péndulo posicionado a ${val}° de manera exacta y en pausa.`, "fa-arrows-to-circle");
+        });
+
+        // Eventos del Selector de Modo de Medición
+        modeAutoBtn.addEventListener('click', () => {
+            measurementMode = 'auto';
+            modeAutoBtn.className = "py-1.5 px-2 text-xs font-bold rounded-lg transition bg-indigo-600 text-white shadow";
+            modeManualBtn.className = "py-1.5 px-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-slate-200";
+            
+            resetTestAndCronometro();
+            showToast("Modo Automático", "El cronómetro se detendrá de manera autónoma al completar las oscilaciones.", "fa-robot");
+        });
+
+        modeManualBtn.addEventListener('click', () => {
+            measurementMode = 'manual';
+            modeManualBtn.className = "py-1.5 px-2 text-xs font-bold rounded-lg transition bg-indigo-600 text-white shadow";
+            modeAutoBtn.className = "py-1.5 px-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-slate-200";
+            
+            resetTestAndCronometro();
+            showToast("Modo Manual Activo", "Tú controlas el cronómetro. Detén la medición cuando alcances el objetivo.", "fa-hand-pointer");
+        });
+
+        function resetTestAndCronometro() {
+            isTesting = false;
+            testCompleted = false;
+            oscillationCount = 0;
+            testElapsedTime = 0;
+            stopwatchDisplay.textContent = "00:00.000";
+            oscillationCounter.textContent = `0 / ${targetOscillations}`;
+            measuredPeriodDisplay.textContent = "0.000 s";
+            
+            startTestBtn.disabled = false;
+            startTestBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            startTestBtn.innerHTML = '<i class="fa-solid fa-play"></i> Iniciar Prueba';
+            startTestBtn.className = "py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/15";
+            targetOscillationsInput.disabled = false;
+        }
+
         function setGravity(g) {
             gravity = g;
             gravitySlider.value = g;
@@ -406,12 +498,14 @@
             angle = 15 * Math.PI / 180;
             angularVelocity = 0.0;
             targetOscillations = 10;
+            measurementMode = 'auto';
 
             lengthSlider.value = 120;
             massSlider.value = 1.20;
             gravitySlider.value = 9.81;
             frictionSlider.value = 0;
             targetOscillationsInput.value = 10;
+            angleManualInput.value = 15;
 
             lengthVal.textContent = "120 cm";
             massVal.textContent = "1.20 kg";
@@ -419,7 +513,11 @@
             frictionVal.textContent = "0 %";
             oscillationCounter.textContent = "0 / 10";
 
+            modeAutoBtn.className = "py-1.5 px-2 text-xs font-bold rounded-lg transition bg-indigo-600 text-white shadow";
+            modeManualBtn.className = "py-1.5 px-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-slate-200";
+
             updateTheoreticalHud();
+            resetTestAndCronometro();
             showToast("Parámetros Reseteados", "Los valores han regresado a su estado inicial de laboratorio.", "fa-rotate-left");
         });
 
@@ -464,56 +562,98 @@
 
         // Iniciar prueba de oscilaciones configurables
         startTestBtn.addEventListener('click', () => {
-            if (isTesting) return;
+            if (measurementMode === 'manual') {
+                if (!isTesting) {
+                    // INICIAR CRONÓMETRO MANUAL
+                    frictionCoeff = 0;
+                    frictionSlider.value = 0;
+                    frictionVal.textContent = "0 %";
 
-            // Desactivar fricción durante el test para un resultado óptimo de laboratorio ideal
-            frictionCoeff = 0;
-            frictionSlider.value = 0;
-            frictionVal.textContent = "0 %";
+                    // Detener para liberar de forma limpia desde el ángulo manual
+                    let val = parseInt(angleManualInput.value) || 15;
+                    angle = val * Math.PI / 180;
+                    angularVelocity = 0;
 
-            // Detener el péndulo para soltarlo exactamente desde 15 grados enteros
-            angle = 15 * Math.PI / 180;
-            angularVelocity = 0;
-            
-            // Forzar reproducción para iniciar la oscilación
-            isPaused = false;
-            playPauseIcon.className = "fa-solid fa-pause";
-            playPauseSimBtn.classList.add("bg-indigo-600");
-            playPauseSimBtn.classList.remove("bg-emerald-600");
+                    // Forzar marcha
+                    isPaused = false;
+                    playPauseIcon.className = "fa-solid fa-pause";
+                    playPauseSimBtn.classList.add("bg-indigo-600");
+                    playPauseSimBtn.classList.remove("bg-emerald-600");
 
-            // Configurar variables de testeo con el objetivo personalizado
-            isTesting = true;
-            testCompleted = false;
-            oscillationCount = 0;
-            testStartTime = performance.now();
-            testElapsedTime = 0;
-            previousAngle = angle;
-            
-            isMovingRight = false;
-            hasCrossedZero = false;
+                    isTesting = true;
+                    testCompleted = false;
+                    oscillationCount = 0;
+                    testStartTime = performance.now();
+                    testElapsedTime = 0;
+                    previousAngle = angle;
+                    isMovingRight = false;
+                    hasCrossedZero = false;
 
-            oscillationCounter.textContent = `0 / ${targetOscillations}`;
-            measuredPeriodDisplay.textContent = "Calculando...";
-            startTestBtn.disabled = true;
-            startTestBtn.classList.add("opacity-50", "cursor-not-allowed");
-            targetOscillationsInput.disabled = true;
+                    oscillationCounter.textContent = `0 / ${targetOscillations} (Referencia)`;
+                    measuredPeriodDisplay.textContent = "Midiendo...";
 
-            showToast("Prueba Iniciada", `Soltando péndulo... El cronómetro se detendrá en la oscilación ${targetOscillations}.`, "fa-stopwatch");
+                    startTestBtn.innerHTML = '<i class="fa-solid fa-stop"></i> Detener Medición';
+                    startTestBtn.className = "py-2.5 px-4 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-rose-600/15";
+                    targetOscillationsInput.disabled = true;
+
+                    showToast("Cronómetro Iniciado", `Observa las oscilaciones. Presiona "Detener" cuando cuentes ${targetOscillations} de forma manual.`, "fa-stopwatch");
+                } else {
+                    // DETENER CRONÓMETRO MANUAL (Hecho por el usuario de forma libre)
+                    isTesting = false;
+                    testCompleted = true;
+                    finalMeasuredPeriod = testElapsedTime / targetOscillations;
+                    measuredPeriodDisplay.textContent = `${finalMeasuredPeriod.toFixed(3)} s`;
+
+                    startTestBtn.innerHTML = '<i class="fa-solid fa-play"></i> Iniciar Prueba';
+                    startTestBtn.className = "py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/15";
+                    targetOscillationsInput.disabled = false;
+
+                    showToast("Medición Completada", `Detenido manualmente en ${testElapsedTime.toFixed(3)} s. Período calculado con éxito.`, "fa-stopwatch-20");
+                }
+            } else {
+                // MODO AUTOMÁTICO CLÁSICO
+                if (isTesting) return;
+
+                // Desactivar fricción durante el test para un resultado óptimo de laboratorio ideal
+                frictionCoeff = 0;
+                frictionSlider.value = 0;
+                frictionVal.textContent = "0 %";
+
+                // Detener el péndulo para soltarlo exactamente desde el ángulo manual o actual
+                let val = parseInt(angleManualInput.value) || 15;
+                angle = val * Math.PI / 180;
+                angularVelocity = 0;
+                
+                // Forzar reproducción para iniciar la oscilación
+                isPaused = false;
+                playPauseIcon.className = "fa-solid fa-pause";
+                playPauseSimBtn.classList.add("bg-indigo-600");
+                playPauseSimBtn.classList.remove("bg-emerald-600");
+
+                // Configurar variables de testeo con el objetivo personalizado
+                isTesting = true;
+                testCompleted = false;
+                oscillationCount = 0;
+                testStartTime = performance.now();
+                testElapsedTime = 0;
+                previousAngle = angle;
+                
+                isMovingRight = false;
+                hasCrossedZero = false;
+
+                oscillationCounter.textContent = `0 / ${targetOscillations}`;
+                measuredPeriodDisplay.textContent = "Calculando...";
+                startTestBtn.disabled = true;
+                startTestBtn.classList.add("opacity-50", "cursor-not-allowed");
+                targetOscillationsInput.disabled = true;
+
+                showToast("Prueba Iniciada", `Soltando péndulo... El cronómetro se detendrá en la oscilación ${targetOscillations}.`, "fa-stopwatch");
+            }
         });
 
         // Resetear prueba
         resetTestBtn.addEventListener('click', () => {
-            isTesting = false;
-            testCompleted = false;
-            oscillationCount = 0;
-            testElapsedTime = 0;
-            stopwatchDisplay.textContent = "00:00.000";
-            oscillationCounter.textContent = `0 / ${targetOscillations}`;
-            measuredPeriodDisplay.textContent = "0.000 s";
-            
-            startTestBtn.disabled = false;
-            startTestBtn.classList.remove("opacity-50", "cursor-not-allowed");
-            targetOscillationsInput.disabled = false;
+            resetTestAndCronometro();
             showToast("Prueba Reiniciada", "Cronómetro y contador restaurados.", "fa-trash-can");
         });
 
@@ -603,12 +743,7 @@
                 isDragging = true;
                 angularVelocity = 0; 
                 if (isTesting) {
-                    isTesting = false;
-                    startTestBtn.disabled = false;
-                    startTestBtn.classList.remove("opacity-50", "cursor-not-allowed");
-                    targetOscillationsInput.disabled = false;
-                    oscillationCounter.textContent = `0 / ${targetOscillations}`;
-                    measuredPeriodDisplay.textContent = "0.000 s";
+                    resetTestAndCronometro();
                 }
             }
         }
@@ -622,6 +757,9 @@
             const limit = 80 * Math.PI / 180;
             if (angle > limit) angle = limit;
             if (angle < -limit) angle = -limit;
+
+            // Sincronizar el input de grados manuales en tiempo real durante el arrastre
+            angleManualInput.value = Math.round(angle * 180 / Math.PI);
         }
 
         function stopDrag() {
@@ -673,24 +811,31 @@
                     // Cruce por cero en sentido inverso del inicio
                     if (previousAngle < 0 && angle >= 0) {
                         oscillationCount++;
-                        oscillationCounter.textContent = `${oscillationCount} / ${targetOscillations}`;
+                        
+                        if (measurementMode === 'manual') {
+                            // En modo manual, solo mostramos el autoconteo como un asistente referencial
+                            oscillationCounter.textContent = `${oscillationCount} / ${targetOscillations} (Auto)`;
+                        } else {
+                            // En modo automático normal, detiene el sistema al llegar al target
+                            oscillationCounter.textContent = `${oscillationCount} / ${targetOscillations}`;
 
-                        if (oscillationCount >= targetOscillations) {
-                            testCompleted = true;
-                            isTesting = false;
-                            finalMeasuredPeriod = testElapsedTime / targetOscillations;
-                            measuredPeriodDisplay.textContent = `${finalMeasuredPeriod.toFixed(3)} s`;
-                            
-                            // Reestablecer inputs
-                            startTestBtn.disabled = false;
-                            startTestBtn.classList.remove("opacity-50", "cursor-not-allowed");
-                            targetOscillationsInput.disabled = false;
+                            if (oscillationCount >= targetOscillations) {
+                                testCompleted = true;
+                                isTesting = false;
+                                finalMeasuredPeriod = testElapsedTime / targetOscillations;
+                                measuredPeriodDisplay.textContent = `${finalMeasuredPeriod.toFixed(3)} s`;
+                                
+                                // Reestablecer inputs
+                                startTestBtn.disabled = false;
+                                startTestBtn.classList.remove("opacity-50", "cursor-not-allowed");
+                                targetOscillationsInput.disabled = false;
 
-                            // ¡AUTOPAUSA AL FINALIZAR EL CONTEO!
-                            isPaused = true;
-                            updatePlayPauseButtonUI();
-                            
-                            showToast("¡Prueba Terminada y Pausada!", `Se completaron las ${targetOscillations} oscilaciones con detención física automática.`, "fa-stopwatch-20");
+                                // ¡AUTOPAUSA AL FINALIZAR EL CONTEO!
+                                isPaused = true;
+                                updatePlayPauseButtonUI();
+                                
+                                showToast("¡Prueba Terminada y Pausada!", `Se completaron las ${targetOscillations} oscilaciones con detención física automática.`, "fa-stopwatch-20");
+                            }
                         }
                     }
                     previousAngle = angle;
